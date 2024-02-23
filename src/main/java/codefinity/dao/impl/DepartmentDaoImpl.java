@@ -76,4 +76,9 @@ public class DepartmentDaoImpl implements DepartmentDao {
         }
         return departments;
     }
+
+    @Override
+    public Department updateDepartment() {
+        return null;
+    }
 }

@@ -3,7 +3,6 @@ package codefinity.dao;
 import codefinity.model.Employee;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 public interface EmployeeDao {
@@ -22,12 +21,4 @@ public interface EmployeeDao {
     Employee setRoleById(int employeeId, int roleId);
 
     Employee updateEmployee(int employeeId, Employee newEmployee);
-
-    Double increaseEmployeesSalary(int employeeId, Double amount);
-
-    Double increaseEmployeesSalary(int employeeId, int percent);
-
-    Double decreaseEmployeesSalary(int employeeId, Double amount);
-
-    Double decreaseEmployeesSalary(int employeeId, int percent);
 }

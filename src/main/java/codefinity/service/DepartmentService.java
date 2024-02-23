@@ -12,4 +12,8 @@ public interface DepartmentService {
     String getDepartmentNameById(int id);
 
     List<Department> getAll();
+
+    Department updateDepartment(int departmentId, Department newDepartment);
+
+    Department updateDepartmentLocation(int departmentId, String newLocation);
 }

@@ -11,7 +11,6 @@ import codefinity.service.impl.EmployeeServiceImpl;
 import codefinity.service.impl.RoleServiceImpl;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class Main {
     public static void main(String[] args) {
@@ -62,26 +61,12 @@ public class Main {
 
         employeeService.add(bob);
 
-        System.out.println("Bob's salary before increasing by value: " + employeeService.getById(bob.getId()).getSalary());
+        System.out.println("All departments info: " + departmentService.getAll());
 
-        employeeService.increaseEmployeesSalary(bob.getId(), 10000.00);
+        System.out.println("Marketing department before changes: " + departmentService.getById(marketing.getId()));
 
-        System.out.println("Bob's salary before increasing by percent: " + employeeService
-                .getById(bob.getId()).getSalary());
+        departmentService.updateDepartmentLocation(marketing.getId(), "Marketing Office");
 
-        employeeService.increaseEmployeesSalary(bob.getId(), 15);
-
-        System.out.println("Bob's salary after 2 increase operations: " + employeeService
-                .getById(bob.getId()).getSalary());
-
-        employeeService.decreaseEmployeesSalary(bob.getId(), 15);
-
-        System.out.println("Bob's salary after decreasing by percent: " + employeeService
-                .getById(bob.getId()).getSalary());
-
-        employeeService.decreaseEmployeesSalary(bob.getId(), 10000.00);
-
-        System.out.println("Bob's salary after decreasing by percent: " + employeeService
-                .getById(bob.getId()).getSalary());
+        System.out.println("Marketing department after changes: " + departmentService.getById(marketing.getId()));
     }
 }

@@ -119,22 +119,50 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Double increaseEmployeesSalary(int employeeId, Double amount) {
-        return employeeDao.increaseEmployeesSalary(employeeId, amount);
+        Employee employee = getById(employeeId);
+        Double oldSalary = employee.getSalary();
+        Double newSalary = oldSalary + amount;
+        employee.setSalary(newSalary);
+        updateEmployee(employeeId, employee);
+        return newSalary;
     }
 
     @Override
     public Double increaseEmployeesSalary(int employeeId, int percent) {
-        return employeeDao.increaseEmployeesSalary(employeeId, percent);
+        Employee employee = getById(employeeId);
+        Double oldSalary = employee.getSalary();
+        Double newSalary = oldSalary + (Math.abs(oldSalary) * percent) / 100;
+        employee.setSalary(newSalary);
+        updateEmployee(employeeId, employee);
+        return newSalary;
     }
 
     @Override
     public Double decreaseEmployeesSalary(int employeeId, Double amount) {
-        return employeeDao.decreaseEmployeesSalary(employeeId, amount);
+        Employee employee = getById(employeeId);
+        Double oldSalary = employee.getSalary();
+        if (oldSalary <= amount) {
+            throw new RuntimeException("You cannot decrease the employee's salary by this amount of money; " +
+                    "the number would go into the negative.");
+        }
+        Double newSalary = oldSalary - amount;
+        employee.setSalary(newSalary);
+        updateEmployee(employeeId, employee);
+        return newSalary;
     }
 
     @Override
     public Double decreaseEmployeesSalary(int employeeId, int percent) {
-        return employeeDao.decreaseEmployeesSalary(employeeId, percent);
+        Employee employee = getById(employeeId);
+        Double oldSalary = employee.getSalary();
+        if (percent >= 100) {
+            throw new RuntimeException("You cannot decrease the employee's salary by this amount of money; " +
+                    "the number would go into the negative.");
+        }
+        Double newSalary = oldSalary - (Math.abs(oldSalary) * percent) / 100;
+        employee.setSalary(newSalary);
+        updateEmployee(employeeId, employee);
+        return newSalary;
     }
 
     private LocalDate dateParser(String date) {

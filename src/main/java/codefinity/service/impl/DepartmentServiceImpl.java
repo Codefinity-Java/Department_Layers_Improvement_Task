@@ -42,4 +42,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Department> getAll() {
         return departmentDao.getAll();
     }
+
+    @Override
+    public Department updateDepartment(int departmentId, Department newDepartment) {
+        return null;
+    }
+
+    @Override
+    public Department updateDepartmentLocation(int departmentId, String newLocation) {
+        return null;
+    }
 }
