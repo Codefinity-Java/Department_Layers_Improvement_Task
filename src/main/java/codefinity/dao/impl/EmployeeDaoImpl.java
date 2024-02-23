@@ -1,0 +1,355 @@
+package codefinity.dao.impl;
+
+import codefinity.dao.EmployeeDao;
+import codefinity.model.Department;
+import codefinity.model.Employee;
+import codefinity.model.Role;
+import codefinity.service.DepartmentService;
+import codefinity.service.RoleService;
+import codefinity.service.impl.DepartmentServiceImpl;
+import codefinity.service.impl.RoleServiceImpl;
+import codefinity.util.HibernateUtil;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.NoSuchElementException;
+
+public class EmployeeDaoImpl implements EmployeeDao {
+    private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+
+    private final DepartmentService departmentService = new DepartmentServiceImpl();
+
+    private final RoleService roleService = new RoleServiceImpl();
+
+    @Override
+    public Employee add(Employee employee) {
+        Session session = null;
+        Transaction transaction = null;
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+            session.persist(employee);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+                throw new RuntimeException("Can't add new Employee", e);
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return employee;
+    }
+    @Override
+    public Employee getById(int id) {
+        Session session = null;
+        Employee employee = null;
+        try {
+            session = sessionFactory.openSession();
+            employee = session.get(Employee.class, id);
+        } catch (Exception e) {
+            throw new HibernateException("Can't get Employee by ID " + id, e);
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return employee;
+    }
+
+    @Override
+    public List<Employee> getEmployeesHiredInASpecificTimeframe(LocalDate startDate, LocalDate endDate) {
+        Session session = null;
+        List<Employee> employees = null;
+        try {
+            session = sessionFactory.openSession();
+
+            String hql = "FROM Employee WHERE hireDate > :startDate AND hireDate <:endDate";
+
+            Query<Employee> query = session.createQuery(hql, Employee.class);
+            query.setParameter("startDate", startDate);
+            query.setParameter("endDate", endDate);
+
+            employees = query.getResultList();
+        } catch (Exception e) {
+            System.out.println("Can't get Employees from the DB" + e);
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return employees;
+    }
+
+    @Override
+    public List<Employee> getAll() {
+        Session session = null;
+        List<Employee> employees = null;
+        try {
+            session = sessionFactory.openSession();
+
+            String hql = "FROM Employee e";
+
+            Query<Employee> query = session.createQuery(hql, Employee.class);
+            employees = query.getResultList();
+        } catch (Exception e) {
+            throw new NoSuchElementException("Can't get Employees from the DB", e);
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return employees;
+    }
+
+    @Override
+    public List<Employee> getEmployeesWithSalaryMoreThan(Double salary) {
+        Session session = null;
+        List<Employee> employees = null;
+        try {
+            session = sessionFactory.openSession();
+
+            String hql = "FROM Employee e WHERE e.salary > :salary";
+
+            Query<Employee> query = session.createQuery(hql, Employee.class);
+            query.setParameter("salary", salary);
+            employees = query.getResultList();
+        } catch (Exception e) {
+            System.out.println("Can't get Employees from the DB" + e);
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return employees;
+    }
+
+    @Override
+    public Employee setDepartmentById(int employeeId, int departmentId) {
+        Employee employee = null;
+        Department department = null;
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+
+            employee = getById(employeeId);
+            department = departmentService.getById(departmentId);
+
+            employee.setDepartment(department);
+            session.merge(employee);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return employee;
+    }
+
+    @Override
+    public Employee setRoleById(int employeeId, int roleId) {
+        Employee employee = null;
+        Role role = null;
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+
+            employee = getById(employeeId);
+            role = roleService.getById(roleId);
+
+            employee.setRole(role);
+            session.merge(employee);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return employee;
+    }
+
+    @Override
+    public Employee updateEmployee(int employeeId, Employee newEmployee) {
+        Employee employee = null;
+        Session session = null;
+        Transaction transaction = null;
+
+        if (newEmployee == null) {
+            throw new NullPointerException("Employee is null!");
+        }
+
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+
+            employee = getById(employeeId);
+            employee.setName(newEmployee.getName());
+            employee.setSalary(newEmployee.getSalary());
+            employee.setHireDate(newEmployee.getHireDate());
+            employee.setDepartment(newEmployee.getDepartment());
+            employee.setRole(newEmployee.getRole());
+
+            session.merge(employee);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return employee;
+    }
+
+    @Override
+    public Double increaseEmployeesSalary(int employeeId, Double amount) {
+        Session session = null;
+        Transaction transaction = null;
+        Employee employee = null;
+        Double newSalary = null;
+
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+            employee = getById(employeeId);
+
+            Double oldSalary = employee.getSalary();
+            newSalary = oldSalary + amount;
+            employee.setSalary(newSalary);
+
+            session.merge(employee);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return newSalary;
+    }
+
+    @Override
+    public Double increaseEmployeesSalary(int employeeId, int percent) {
+        Session session = null;
+        Transaction transaction = null;
+        Employee employee = null;
+        Double newSalary = null;
+
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+            employee = getById(employeeId);
+
+            Double oldSalary = employee.getSalary();
+            newSalary = oldSalary + (Math.abs(oldSalary) * percent) / 100;
+            employee.setSalary(newSalary);
+
+            session.merge(employee);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return newSalary;
+    }
+
+    @Override
+    public Double decreaseEmployeesSalary(int employeeId, Double amount) {
+        Session session = null;
+        Transaction transaction = null;
+        Employee employee = null;
+        Double newSalary = null;
+
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+            employee = getById(employeeId);
+
+            Double oldSalary = employee.getSalary();
+
+            if (oldSalary <= amount) {
+                throw new Exception("You cannot decrease the employee's salary by this amount of money; " +
+                        "the number would go into the negative.");
+            }
+            newSalary = oldSalary - amount;
+            employee.setSalary(newSalary);
+
+            session.merge(employee);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return newSalary;
+    }
+
+    @Override
+    public Double decreaseEmployeesSalary(int employeeId, int percent) {
+        Session session = null;
+        Transaction transaction = null;
+        Employee employee = null;
+        Double newSalary = null;
+
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+            employee = getById(employeeId);
+
+            Double oldSalary = employee.getSalary();
+            if (percent >= 100) {
+                throw new Exception("You cannot decrease the employee's salary by this amount of money; " +
+                        "the number would go into the negative.");
+            }
+            newSalary = oldSalary - (Math.abs(oldSalary) * percent) / 100;
+            employee.setSalary(newSalary);
+
+            session.merge(employee);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return newSalary;
+    }
+}

@@ -1,0 +1,41 @@
+package codefinity.service;
+
+import codefinity.model.Department;
+import codefinity.model.Employee;
+import codefinity.model.Role;
+
+import java.util.List;
+
+public interface EmployeeService {
+    Employee add(Employee employee);
+
+    Employee getById(int id);
+
+    String getEmployeeNameById(int id);
+
+    List<Employee> getEmployeesHiredInASpecificTimeframe(String startDate, String endDate);
+
+    List<String> getEmployeesNamesHiredInASpecificTimeframe(String startDate, String endDate);
+
+    List<Employee> getAll();
+
+    List<Employee> getEmployeesWithSalaryMoreThan(Double salary);
+
+    Employee setDepartmentById(int employeeId, int departmentId);
+
+    Employee setDepartmentById(int employeeId, Department department);
+
+    Employee setRoleById(int employeeId, int roleId);
+
+    Employee setRoleById(int employeeId, Role role);
+
+    Employee updateEmployee(int employeeId, Employee newEmployee);
+
+    Double increaseEmployeesSalary(int employeeId, Double amount);
+
+    Double increaseEmployeesSalary(int employeeId, int percent);
+
+    Double decreaseEmployeesSalary(int employeeId, Double amount);
+
+    Double decreaseEmployeesSalary(int employeeId, int percent);
+}
