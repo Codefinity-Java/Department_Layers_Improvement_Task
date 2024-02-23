@@ -78,7 +78,7 @@ public class DepartmentDaoImpl implements DepartmentDao {
     }
 
     @Override
-    public Department updateDepartment() {
+    public Department updateDepartment(int departmentId, Department newDepartment) {
         return null;
     }
 }
